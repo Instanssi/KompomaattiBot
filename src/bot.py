@@ -1,31 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Import libs
+# Import twisted
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
-import os,sys
-from datetime import datetime,timedelta
-
-# Import configuration
-import config
-
-# Django environment
-sys.path.append(config.DJANGO_ROOT)
-os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS
-
-# Import django model
-from Instanssi.screenshow.models import IRCMessage
-
-# Helper decode function
-def decode(bytes):
-    try:
-        text = bytes.decode('utf-8')
-    except UnicodeDecodeError:
-        try:
-            text = bytes.decode('iso-8859-1')
-        except UnicodeDecodeError:
-            text = bytes.decode('cp1252')
-    return text
+from django_integration import django_log_add, django_log_cleanup
 
 # Bot itself
 class KompomaattiBot(irc.IRCClient):
@@ -47,34 +25,30 @@ class KompomaattiBot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         # Skip private messages
         if channel == self.nickname:
+            # Implement help and other stuff later ...
+            if msg == 'help':
+                print 'User',user,'is asking for help.'
             return
 
         # Remove old messages
         if self.factory.cleanup_test >= self.factory.cleanup_limit:
-            filterdate = datetime.now() - timedelta(days=1)
-            IRCMessage.objects.filter(date__lt=filterdate).delete()
+            django_log_cleanup()
             self.factory.cleanup_test = 0
         else:
             self.factory.cleanup_test += 1
+    
+        # Write to log
+        django_log_add(user.split('!', 1)[0], msg, self.factory.event_id)
 
-        # Save message
-        try:
-            message = IRCMessage()
-            message.event_id = config.EVENT_ID
-            message.date = datetime.now()
-            message.message = unicode(decode(msg))
-            message.nick = unicode(decode(user.split('!', 1)[0]))
-            message.save()
-        except UnicodeDecodeError:
-            print "Error while attempting to decode message: Unknown character encoding."
         
 # Factory for bots
 class LogBotFactory(protocol.ClientFactory):
-    def __init__(self):
-        self.channel = config.CHANNEL
-        self.nickname = config.NICK
-        self.host = config.SERVER
-        self.port = config.PORT
+    def __init__(self, channel, nickname, host, port, event_id):
+        self.channel = channel
+        self.nickname = nickname
+        self.host = host
+        self.port = port
+        self.event_id = event_id
         self.cleanup_test = 0
         self.cleanup_limit = 20
 
@@ -94,8 +68,3 @@ class LogBotFactory(protocol.ClientFactory):
     def clientConnectionFailed(self, connector, reason):
         print "Could not connect: ", reason
         
-if __name__ == '__main__':
-    botfactory = LogBotFactory()
-    reactor.connectTCP(config.SERVER, config.PORT, botfactory)
-    reactor.run()
-    
