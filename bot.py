@@ -4,7 +4,7 @@
 from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 import os,sys
-from datetime import datetime
+from datetime import datetime,timedelta
 
 # Import configuration
 import config
@@ -49,13 +49,24 @@ class KompomaattiBot(irc.IRCClient):
         if channel == self.nickname:
             return
 
+        # Remove old messages
+        if self.factory.cleanup_test >= self.factory.cleanup_limit:
+            filterdate = datetime.now() - timedelta(days=1)
+            IRCMessage.objects.filter(date__lt=filterdate).delete()
+            self.factory.cleanup_test = 0
+        else:
+            self.factory.cleanup_test += 1
+
         # Save message
-        message = IRCMessage()
-        message.event_id = config.EVENT_ID
-        message.date = datetime.now()
-        message.message = unicode(decode(msg))
-        message.nick = unicode(decode(user.split('!', 1)[0]))
-        message.save()
+        try:
+            message = IRCMessage()
+            message.event_id = config.EVENT_ID
+            message.date = datetime.now()
+            message.message = unicode(decode(msg))
+            message.nick = unicode(decode(user.split('!', 1)[0]))
+            message.save()
+        except UnicodeDecodeError:
+            print "Error while attempting to decode message: Unknown character encoding."
         
 # Factory for bots
 class LogBotFactory(protocol.ClientFactory):
@@ -64,6 +75,8 @@ class LogBotFactory(protocol.ClientFactory):
         self.nickname = config.NICK
         self.host = config.SERVER
         self.port = config.PORT
+        self.cleanup_test = 0
+        self.cleanup_limit = 20
 
     def buildProtocol(self, addr):
         bot = KompomaattiBot()
