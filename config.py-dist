@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+
+# IRC Server
+SERVER = ''
+
+# Port for server
+PORT = 6667
+
+# IRC channel to join
+CHANNEL = '#mychannel'
+
+# Name for the bot
+NICK = 'kompomaattibot'
+
+# Path to django project root (eg. /var/www/MyProject)
+DJANGO_ROOT = u''
+
+# Settings module (eg. MyProject.settings)
+DJANGO_SETTINGS = ''
+
+# Kompomaatti event id (Must be an existing event)
+EVENT_ID = 0
