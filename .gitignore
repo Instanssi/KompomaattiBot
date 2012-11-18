@@ -1,2 +1,5 @@
 *.pyc
-config.py
+.project
+.pydevproject
+.settings/
+src/config.py
