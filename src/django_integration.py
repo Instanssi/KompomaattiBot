@@ -4,8 +4,19 @@
 import utils
 from datetime import datetime
 
-# Import django model
+# Django stuff
+from Instanssi.kompomaatti.misc.events import get_upcoming
 from Instanssi.screenshow.models import IRCMessage
+from Instanssi.kompomaatti.models import Event
+
+def django_get_event(id):
+    try:
+        return Event.objects.get(pk=id)
+    except:
+        return None
+
+def django_get_upcoming(event):
+    return get_upcoming(event)[:5]
 
 def django_log_cleanup():
     limit = 50
