@@ -25,22 +25,30 @@ class KompomaattiBot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         short_name = user.split('!', 1)[0]
         
+        # If command is sent on any chat, switch to private chat handler
+        if msg == '!ohjelma':
+            channel = self.nickname;
+            msg = 'ohjelma'
+        if msg == '!ohje':
+            channel = self.nickname;
+            msg = 'ohje'
+        
         # Skip private messages
         if channel == self.nickname:
-            if msg == 'help':
-                self.msg(user, "--- Command list ---")
-                self.msg(user, " * help      Prints this help.")
-                self.msg(user, " * version   Prints bot version information")
-                self.msg(user, " * events    Prints list of next 5 upcoming events")
-            elif msg == 'version':
-                self.msg(user, "KompomaattiBot v0.1 by Katajakasa")
-            elif msg == 'events':
+            if msg == 'ohje':
+                self.msg(user, u"--- Komentolista ---".encode( "utf-8" ))
+                self.msg(user, u" * ohje      Tulostaa tämän ohjeen.".encode( "utf-8" ))
+                self.msg(user, u" * versio    Tulostaa versiotiedot.".encode( "utf-8" ))
+                self.msg(user, u" * ohjelma   Tulostaa seuraavat 5 tapahtumaa.".encode( "utf-8" ))
+            elif msg == 'versio':
+                self.msg(user, u"KompomaattiBot v0.1 by Katajakasa".encode( "utf-8" ))
+            elif msg == 'ohjelma':
                 for event in django_get_upcoming(self.factory.event):
                     time = event['date'].strftime("%d.%m.%Y klo. %H:%I")
                     ostr = time+" - "+event['title']
                     self.msg(user, ostr.encode( "utf-8" ))
             else:
-                self.msg(user, "Unidentified command. Use command \"help\" for commands list.")
+                self.msg(user, u"Komentoa ei tunnistettu. Ohjeen saa näkyviin kirjoittamalla \"ohje\"".encode( "utf-8" ))
                 
             print "Received command",msg,"from",short_name
         else:
