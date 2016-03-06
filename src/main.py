@@ -9,10 +9,12 @@ except:
     
 # Library imports
 import os,sys
+import django
 
 # Django environment
 sys.path.append(config.DJANGO_ROOT)
 os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS
+django.setup()
 
 # Other imports
 from bot import LogBotFactory, BotException
