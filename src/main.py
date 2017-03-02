@@ -4,7 +4,6 @@ import os
 import sys
 import django
 import irc3
-from .django_integration import django_log_add, django_log_cleanup
 
 # Attempt to find configuration
 try:
@@ -16,6 +15,8 @@ except ImportError:
 # Django environment
 sys.path.append(config.DJANGO_ROOT)
 os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS
+
+from .django_integration import django_log_add, django_log_cleanup
 
 
 @irc3.plugin
