@@ -7,7 +7,7 @@ import irc3
 
 # Attempt to find configuration
 try:
-    import config
+    from . import config
 except ImportError:
     print("Config module not found! Remember to rename config.py-dist to config.py!")
     exit()
