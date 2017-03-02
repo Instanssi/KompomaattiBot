@@ -3,3 +3,4 @@
 .pydevproject
 .settings/
 src/config.py
+.idea
