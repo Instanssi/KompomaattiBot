@@ -15,6 +15,7 @@ except ImportError:
 # Django environment
 sys.path.append(config.DJANGO_ROOT)
 os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS
+django.setup()
 
 from .django_integration import django_log_add, django_log_cleanup
 
@@ -73,5 +74,4 @@ def main():
 
 
 if __name__ == '__main__':
-    django.setup()
     main()
