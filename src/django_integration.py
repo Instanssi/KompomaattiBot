@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Libraries
-from datetime import datetime
+from django.utils import timezone
 
 # Django stuff
 from Instanssi.kompomaatti.misc.events import get_upcoming
@@ -37,7 +37,7 @@ def django_log_add(user, msg, event_id):
     try:
         message = IRCMessage()
         message.event_id = event_id
-        message.date = datetime.now()
+        message.date = timezone.now()
         message.message = msg
         message.nick = user
         message.save()
